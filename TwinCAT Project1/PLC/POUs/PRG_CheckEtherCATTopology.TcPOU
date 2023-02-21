@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="PRG_CheckEtherCATTopology" Id="{9c5637a1-2f9c-477e-95f6-471dd90ae48d}" SpecialFunc="None">
+    <Declaration><![CDATA[//Each vairent needs to be run once, for this to work properly - the configured ethercat devices are stored in a JSON file at %TC_RESOURCEPATH% VariantName.json'
+PROGRAM PRG_CheckEtherCATTopology
+VAR_INPUT
+    xCheckTopology : BOOL := TRUE;
+END_VAR
+VAR
+    rtCheck              : R_TRIG;
+    EcMasterNetID AT %I* : AMSNETID;
+    fbEcGetConfSlaves    : FB_EcGetConfSlaves;
+    fbEcGetScannedSlaves : FB_EcGetScannedSlaves;
+
+    CurrentEcConfSlaveInfo : EtherCAT_Offline_Config;                               //: ARRAY[0..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;
+    ArrEcScannedSlaveInfo  : ARRAY[1..GVL.MaxNumOfSlaves] OF ST_EcSlaveScannedData; //: ARRAY[0..EC_MAX_SLAVES] OF ST_EcSlaveScannedData;
+    i                      : UINT;
+
+    eStep : (Init,
+        GetOffLineConfig,
+        GenerateCurrentVarientEcConfigFile,
+        SavingActiveVarient,
+        LoadVariantXEcConfigFiles,
+        GetOnLineScanned,
+        compare);
+
+    //Description of all available varients.
+    arVarientEcConfig : ARRAY[E_Variant.Unknown..E_Variant.End] OF EtherCAT_Offline_Config;
+
+    //File handling - store ethercat configuration into a file outside of the boot folder
+    Result            : HRESULT;
+    fbJson            : FB_JsonSaxWriter;
+    fbJsonDataType    : FB_JsonReadWriteDataType;
+    fbJsonFileHandler : FB_JsonDomParser;
+    bSave             : BOOL;
+    bSaved            : BOOL;
+    bLoad             : BOOL;
+    bLoaded           : BOOL;
+    eVariantIndex     : E_Variant;
+    aVariantIsTheSame : ARRAY[E_Variant.Unknown..E_Variant.End] OF BOOL;
+
+    sFilePath : STRING(255);
+    sJsonDoc  : STRING(10000);
+
+    fbformat : FB_FormatString2;
+    sFormat  : T_MaxString;
+    sOut     : STRING(600);
+END_VAR
+VAR_OUTPUT
+    eMatchedVariant     : E_Variant;
+    sMatchedVariant     : T_MaxString;
+    xScanAndConfigMatch : BOOL;
+    xMoreThanOnMatch    : BOOL;
+
+    bBusy       : BOOL;
+    bError      : BOOL;
+    nErrorID    : UDINT;
+    ErrorOnStep : DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[rtCheck(CLK := xCheckTopology);
+
+CASE eStep OF
+
+    Init:
+        bBusy := FALSE;
+
+        IF rtCheck.q THEN
+            eMatchedVariant  := E_Variant.Unknown;
+            sMatchedVariant  := '';
+            xMoreThanOnMatch := FALSE;
+            bBusy            := TRUE;
+            bError           := FALSE;
+            nErrorID         := 0;
+            eStep            := GetOffLineConfig;
+        END_IF
+
+    GetOffLineConfig:
+        fbEcGetConfSlaves(sNetId := F_CreateAmsNetId(EcMasterNetID),
+            pArrEcConfSlaveInfo := ADR(CurrentEcConfSlaveInfo),
+            cbBufLen := SIZEOF(CurrentEcConfSlaveInfo),
+            bExecute := TRUE);
+
+        IF NOT fbEcGetConfSlaves.bBusy THEN
+            fbEcGetConfSlaves(bExecute := FALSE);
+
+            IF NOT fbEcGetConfSlaves.bError THEN
+                eStep := GenerateCurrentVarientEcConfigFile;
+            ELSE
+                bError      := TRUE;
+                nErrorID    := fbEcGetConfSlaves.nErrorID;
+                ErrorOnStep := eStep;
+                eStep       := Init;
+                ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'error %s getting configured EtherCAT slaves', TO_STRING(nErrorID));
+            END_IF
+        END_IF
+
+    GenerateCurrentVarientEcConfigFile:
+
+        fbJson.ResetDocument();
+
+        fbJsonDataType.AddJsonValueFromSymbol(fbWriter := fbJson,
+            sDatatype := 'EtherCAT_Offline_Config',
+            nData := SIZEOF(CurrentEcConfSlaveInfo),
+            pData := ADR(CurrentEcConfSlaveInfo),
+            hrErrorCode => Result);
+
+        IF Result <> S_OK THEN
+            bError      := TRUE;
+            nErrorID    := TO_UDINT(Result);
+            ErrorOnStep := eStep;
+            eStep       := Init;
+            ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'error %s getting json value from Symbol', TO_STRING(Result));
+            RETURN;
+        END_IF
+
+        fbJson.CopyDocument(pDoc := sJsonDoc, nDoc := SIZEOF(sJsonDoc), hrErrorCode => Result);
+
+        IF Result <> S_OK THEN
+            bError      := TRUE;
+            nErrorID    := TO_UDINT(Result);
+            ErrorOnStep := eStep;
+            eStep       := Init;
+            ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'error %s copying json document', TO_STRING(Result));
+            RETURN;
+        END_IF
+
+        fbJsonFileHandler.ParseDocument(sJson := sJsonDoc);
+
+        sFilePath := CONCAT('%TC_RESOURCEPATH%', CONCAT(TO_STRING(GVL.CurrentVariant), '.json'));
+
+        bSave := TRUE;
+        eStep := SavingActiveVarient;
+
+    SavingActiveVarient:
+        IF bSave THEN
+            bSaved := fbJsonFileHandler.SaveDocumentToFile(sFilePath, bSave);
+        END_IF
+
+        IF NOT bSave THEN
+            IF bSaved THEN
+                eStep         := LoadVariantXEcConfigFiles;
+                bLoad         := TRUE;
+                eVariantIndex := E_Variant.Unknown + 1;
+            ELSE
+                ErrorOnStep := eStep;
+                eStep       := Init;
+                ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'error saving file %s', sFilePath);
+                RETURN;
+            END_IF
+        END_IF
+
+    LoadVariantXEcConfigFiles:
+        sFilePath := CONCAT('%TC_RESOURCEPATH%', CONCAT(TO_STRING(eVariantIndex), '.json'));
+
+        IF bLoad THEN
+            bLoaded := fbJsonFileHandler.LoadDocumentFromFile(sFilePath, bLoad);
+        END_IF
+
+        IF NOT bLoad THEN
+            IF bLoaded THEN
+                fbJsonFileHandler.CopyDocument(pDoc := sJsonDoc, nDoc := SIZEOF(sJsonDoc));
+                fbJsonDataType.SetSymbolFromJson(sJson := sJsonDoc,
+                    sDatatype := 'EtherCAT_Offline_Config',
+                    nData := SIZEOF(arVarientEcConfig[eVariantIndex]),
+                    pData := ADR(arVarientEcConfig[eVariantIndex]),
+                    hrErrorCode => Result);
+
+                IF Result = S_OK THEN
+                    IF eVariantIndex = E_Variant.End - 1 THEN
+                        eStep := GetOnLineScanned;
+                    ELSE
+                        bLoad         := TRUE;
+                        eVariantIndex := eVariantIndex + 1;
+                    END_IF
+                ELSE
+                    bError      := TRUE;
+                    nErrorID    := TO_UDINT(Result);
+                    ErrorOnStep := eStep;
+                    eStep       := Init;
+                    ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'error %s set symbol from json', TO_STRING(Result));
+                    RETURN;
+                END_IF
+            ELSE
+                ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'Error loading file %s', sFilePath);
+                bError      := TRUE;
+                ErrorOnStep := eStep;
+                eStep       := Init;
+            END_IF
+        END_IF
+
+    GetOnLineScanned:
+        fbEcGetScannedSlaves(bExecute := TRUE,
+            sNetId := F_CreateAmsNetId(EcMasterNetID),
+            pArrEcScannedSlaveInfo := ADR(ArrEcScannedSlaveInfo),
+            cbBufLen := SIZEOF(ArrEcScannedSlaveInfo));
+
+        IF NOT fbEcGetScannedSlaves.bBusy THEN
+            fbEcGetScannedSlaves(bExecute := FALSE);
+
+            IF NOT fbEcGetScannedSlaves.bError THEN
+                eStep := compare;
+            ELSE
+                bError      := TRUE;
+                nErrorID    := fbEcGetScannedSlaves.nErrorId;
+                ErrorOnStep := eStep;
+                eStep       := Init;
+                ADSLOGSTR(ADSLOG_MSGTYPE_ERROR OR ADSLOG_MSGTYPE_LOG, 'error % getting scanned EtherCAT slaves', TO_STRING(nErrorID));
+            END_IF
+        END_IF
+
+    compare:
+        //This compare operation might be over complex for most cases. Here every device in the network is checked to see if the EtherCAT slave VPR (vendor, product, and revision) matchs the offline configuration, and online found devices. 
+        //It might be sutiable to only check one specfic slave location.	
+
+        //Checks if the current scaned devices matchs the configured devices
+        xScanAndConfigMatch := TRUE;
+
+        FOR i := 1 TO GVL.MaxNumOfSlaves DO
+            IF ArrEcScannedSlaveInfo[i].stSlaveIdentity.vendorId <> CurrentEcConfSlaveInfo[i].stSlaveIdentity.vendorId OR
+                ArrEcScannedSlaveInfo[i].stSlaveIdentity.productCode <> CurrentEcConfSlaveInfo[i].stSlaveIdentity.productCode OR
+                ArrEcScannedSlaveInfo[i].stSlaveIdentity.revisionNo <> CurrentEcConfSlaveInfo[i].stSlaveIdentity.revisionNo
+                THEN
+                xScanAndConfigMatch := FALSE;
+            END_IF
+        END_FOR
+
+        IF xScanAndConfigMatch THEN
+            ADSLOGSTR(ADSLOG_MSGTYPE_HINT OR ADSLOG_MSGTYPE_LOG, 'The current EtherCAT configuration matchs the scanned devices', '');
+        END_IF
+
+        //Check all variants against what was found
+        MEMSET(ADR(aVariantIsTheSame), 1, SIZEOF(aVariantIsTheSame));
+
+        FOR eVariantIndex := E_Variant.Unknown TO E_Variant.End DO //Check against all variants
+            FOR i := 1 TO GVL.MaxNumOfSlaves DO                    //Check the found slaves against a variant offline config
+                IF ArrEcScannedSlaveInfo[i].stSlaveIdentity.vendorId <> arVarientEcConfig[eVariantIndex][i].stSlaveIdentity.vendorId OR
+                    ArrEcScannedSlaveInfo[i].stSlaveIdentity.productCode <> arVarientEcConfig[eVariantIndex][i].stSlaveIdentity.productCode OR
+                    ArrEcScannedSlaveInfo[i].stSlaveIdentity.revisionNo <> arVarientEcConfig[eVariantIndex][i].stSlaveIdentity.revisionNo
+                    THEN
+                    aVariantIsTheSame[eVariantIndex] := FALSE;
+                END_IF
+            END_FOR
+        END_FOR
+
+        FOR eVariantIndex := E_Variant.Unknown + 1 TO E_Variant.End - 1 DO
+            IF aVariantIsTheSame[eVariantIndex] THEN
+                IF eMatchedVariant = E_Variant.Unknown THEN
+                    eMatchedVariant := eVariantIndex;
+                    sMatchedVariant := TO_STRING(eMatchedVariant);
+                ELSE
+                    xMoreThanOnMatch := TRUE;
+                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN OR ADSLOG_MSGTYPE_LOG, 'more than one variant EtherCAT configuration matchs what was scanned', '');
+                END_IF
+            END_IF
+        END_FOR
+
+        IF eMatchedVariant <> E_Variant.Unknown AND NOT xMoreThanOnMatch AND NOT xScanAndConfigMatch THEN
+            sFormat := 'The current EtherCAT configuration (variant %s) doesnt match what was scanned consider loading variant %s ';
+            fbFormat(pFormatString := ADR(sFormat),
+                arg1 := F_STRING(GVL.sCurrentVariant),
+                arg2 := F_STRING(sMatchedVariant),
+                pDstString := ADR(sOut),
+                nDstSize := SIZEOF(sOut));
+
+            ADSLOGSTR(ADSLOG_MSGTYPE_WARN OR ADSLOG_MSGTYPE_LOG, sOut, '');
+        END_IF
+
+        eStep := Init;
+
+END_CASE
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

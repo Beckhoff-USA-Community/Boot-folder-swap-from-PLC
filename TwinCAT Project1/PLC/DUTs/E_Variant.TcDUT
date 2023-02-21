@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_Variant" Id="{3299a5c4-f629-4453-b8ef-e782501b70bd}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'to_string'}
+TYPE
+    E_Variant :
+    (
+        Unknown := 0,
+        RevA    := 1,
+        RevB    := 2,
+        End     := 3
+    );
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

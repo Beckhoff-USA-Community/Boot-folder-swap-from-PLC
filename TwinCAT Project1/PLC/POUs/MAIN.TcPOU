@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{9cc596e3-efae-491e-b04f-4ee17ca5cc73}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+    Outputs AT %Q* : ARRAY[0..15] OF BOOL;
+    fbBlink        : BLINK;
+    i              : UDINT;
+	
+	xCheckTopologyForVariantMatch :BOOL:=TRUE;
+	xSwapBootFolder	:BOOL;
+
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbBlink(ENABLE := TRUE, TIMELOW := T#1S, TIMEHIGH := T#1S);
+
+FOR i := 0 TO 15 DO
+    Outputs[i] := fbBlink.OUT;
+END_FOR
+
+
+
+PRG_CheckEtherCATTopology(
+	xCheckTopology:=xCheckTopologyForVariantMatch , 
+	eMatchedVariant=> , 
+	sMatchedVariant=> , 
+	xScanAndConfigMatch=> , 
+	xMoreThanOnMatch=> , 
+	bBusy=> , 
+	bError=> , 
+	nErrorID=> , 
+	ErrorOnStep=> );
+
+PRG_SwapBootFolder(
+	VariantToLoad:=PRG_CheckEtherCATTopology.eMatchedVariant , 
+	xSwapBootFolder:=xSwapBootFolder , 
+	busy=> , 
+	error=> , 
+	ErrorID=> );
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

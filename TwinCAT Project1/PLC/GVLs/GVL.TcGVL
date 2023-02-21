@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL" Id="{b08fe6b0-dac6-49b0-ab6c-38c28a66f209}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+    {IF defined (RevA)}
+    CurrentVariant : E_Variant := E_Variant.RevA;
+    {ELSIF defined (RevB)}
+    CurrentVariant : E_Variant := E_Variant.RevB;
+    {ELSE}
+    CurrentVariant : E_Variant := E_Variant.Unknown;
+    {END_IF}
+    MaxNumOfSlaves : UINT := 5;
+END_VAR
+VAR_GLOBAL
+    sCurrentVariant : T_MaxString := TO_STRING(CurrentVariant);
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

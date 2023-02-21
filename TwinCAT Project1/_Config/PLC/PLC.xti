@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.40" ClassName="CNestedPlcProjDef" TcProjectVariant="RevA">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000041}" TcBaseType="true" HideSubItems="true" CName="AmsNetId">AMSNETID</Name>
+			<BitSize>48</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+			<Format>
+				<Printf>%d.%d.%d.%d.%d.%d</Printf>
+				<Parameter>[0]</Parameter>
+				<Parameter>[1]</Parameter>
+				<Parameter>[2]</Parameter>
+				<Parameter>[3]</Parameter>
+				<Parameter>[4]</Parameter>
+				<Parameter>[5]</Parameter>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{37DF1FA7-25A9-2180-5625-C9B3B7C20643}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..15] OF BOOL</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>16</Elements>
+			</ArrayInfo>
+		</DataType>
+	</DataTypes>
+	<Project GUID="{53A11DAE-2835-488E-B9B6-67BC4A037C67}" Name="PLC" PrjFilePath="..\..\PLC\PLC.plcproj" TmcFilePath="..\..\PLC\PLC.tmc" EnableImplicitDefines="true" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<ProjectVariant PvUseDefine="true">
+			<Variant>
+				<Name>RevA</Name>
+				<Name>RevB</Name>
+				<Defines></Defines>
+			</Variant>
+		</ProjectVariant>
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC\PLC.tmc" TmcHash="{AFC20E02-C4BB-1A48-5E3D-3E6FD5ED88FD}">
+			<Name>PLC Instance</Name>
+			<ProjectVariant PvUseLink="true">
+				<Variant>
+					<Name>RevA</Name>
+					<IoMapping>
+						<Links>
+							<OwnerA Name="__THIS__">
+								<OwnerB Name="TIID^Device 1 (EtherCAT)">
+									<Link VarA="PlcTask Inputs^PRG_CheckEtherCATTopology.EcMasterNetID" VarB="InfoData^AmsNetId"/>
+								</OwnerB>
+								<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 2 (EL2809)">
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[0]" VarB="Channel 1^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[10]" VarB="Channel 11^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[11]" VarB="Channel 12^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[12]" VarB="Channel 13^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[13]" VarB="Channel 14^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[14]" VarB="Channel 15^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[15]" VarB="Channel 16^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[1]" VarB="Channel 2^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[2]" VarB="Channel 3^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[3]" VarB="Channel 4^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[4]" VarB="Channel 5^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[5]" VarB="Channel 6^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[6]" VarB="Channel 7^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[7]" VarB="Channel 8^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[8]" VarB="Channel 9^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[9]" VarB="Channel 10^Output"/>
+								</OwnerB>
+							</OwnerA>
+						</Links>
+					</IoMapping>
+				</Variant>
+				<Variant>
+					<Name>RevB</Name>
+					<IoMapping>
+						<Links>
+							<OwnerA Name="__THIS__">
+								<OwnerB Name="TIID^Device 1 (EtherCAT)">
+									<Link VarA="PlcTask Inputs^PRG_CheckEtherCATTopology.EcMasterNetID" VarB="InfoData^AmsNetId"/>
+								</OwnerB>
+								<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 2 (EL2809-0015)">
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[0]" VarB="Channel 1^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[10]" VarB="Channel 11^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[11]" VarB="Channel 12^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[12]" VarB="Channel 13^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[13]" VarB="Channel 14^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[14]" VarB="Channel 15^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[15]" VarB="Channel 16^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[1]" VarB="Channel 2^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[2]" VarB="Channel 3^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[3]" VarB="Channel 4^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[4]" VarB="Channel 5^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[5]" VarB="Channel 6^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[6]" VarB="Channel 7^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[7]" VarB="Channel 8^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[8]" VarB="Channel 9^Output"/>
+									<Link VarA="PlcTask Outputs^MAIN.Outputs[9]" VarB="Channel 10^Output"/>
+								</OwnerB>
+							</OwnerA>
+						</Links>
+					</IoMapping>
+				</Variant>
+			</ProjectVariant>
+			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+			<Vars VarGrpType="1">
+				<Name>PlcTask Inputs</Name>
+				<Var>
+					<Name>PRG_CheckEtherCATTopology.EcMasterNetID</Name>
+					<Type GUID="{18071995-0000-0000-0000-000000000041}">AMSNETID</Type>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="2" AreaNo="1">
+				<Name>PlcTask Outputs</Name>
+				<Var>
+					<Name>MAIN.Outputs</Name>
+					<Type GUID="{37DF1FA7-25A9-2180-5625-C9B3B7C20643}">ARRAY [0..15] OF BOOL</Type>
+				</Var>
+			</Vars>
+			<Contexts>
+				<Context>
+					<Id NeedCalleeCall="true">0</Id>
+					<Name>PlcTask</Name>
+					<ManualConfig>
+						<OTCID>#x02010030</OTCID>
+					</ManualConfig>
+					<Priority>20</Priority>
+					<CycleTime>4000000</CycleTime>
+				</Context>
+			</Contexts>
+			<TaskPouOids>
+				<TaskPouOid Prio="20" OTCID="#x08502001"/>
+			</TaskPouOids>
+		</Instance>
+	</Project>
+	<Mappings>
+		<OwnerA Name="PLC Instance">
+			<OwnerB Name="TIID^Device 1 (EtherCAT)">
+				<Link VarA="PlcTask Inputs^PRG_CheckEtherCATTopology.EcMasterNetID" VarB="InfoData^AmsNetId"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 2 (EL2809)">
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[0]" VarB="Channel 1^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[10]" VarB="Channel 11^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[11]" VarB="Channel 12^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[12]" VarB="Channel 13^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[13]" VarB="Channel 14^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[14]" VarB="Channel 15^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[15]" VarB="Channel 16^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[1]" VarB="Channel 2^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[2]" VarB="Channel 3^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[3]" VarB="Channel 4^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[4]" VarB="Channel 5^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[5]" VarB="Channel 6^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[6]" VarB="Channel 7^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[7]" VarB="Channel 8^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[8]" VarB="Channel 9^Output" Size="1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Outputs[9]" VarB="Channel 10^Output" Size="1"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
+</TcSmItem>

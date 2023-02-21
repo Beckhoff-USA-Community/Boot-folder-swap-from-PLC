@@ -1,0 +1,1 @@
+  PowerShell.exe -executionpolicy remotesigned -File C:\TwinCAT\3.1\Target\Resource\VariantSwitch.ps1 %1

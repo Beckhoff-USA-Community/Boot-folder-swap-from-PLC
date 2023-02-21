@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="PRG_SwapBootFolder" Id="{f98482dc-4135-4923-a669-4835a3fba1ea}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM PRG_SwapBootFolder
+VAR_INPUT
+    VariantToLoad   : E_Variant;
+    xSwapBootFolder : BOOL;
+END_VAR
+VAR
+    ntCallPowerShellScript : NT_StartProcess;
+END_VAR
+VAR_OUTPUT
+    busy    : BOOL;
+    error   : BOOL;
+    ErrorID : UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ntCallPowerShellScript(NETID := '',
+    PATHSTR := 'C:\TwinCAT\3.1\Target\Resource\VariantSwitch.bat',
+    DIRNAME := 'C:\TwinCAT\3.1\Target\Resource\',
+    COMNDLINE := TO_STRING(VariantToLoad),
+    START := xSwapBootFolder,
+    TMOUT :=,
+    BUSY => busy,
+    ERR => error,
+    ERRID => ErrorID);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
