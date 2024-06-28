@@ -9,7 +9,7 @@ When a TwinCAT project is successfully compiled, all necessary runtime files are
 Upon activation ![image](https://user-images.githubusercontent.com/19829308/220220768-bd583224-5e67-4282-ab9e-06754671e32a.png), the files in this folder are copied to the target's Boot folder (C:\TwinCAT\3.1\Boot) and then the TwinCAT system is restarted. 
 After a restart, the TwinCAT system loads the files from the boot folder into memory and starts to execute them.
 
-More information about this process is also found here [TwinCAT 3 | Machine update at file level](https://infosys.beckhoff.com/content/1033/machineupdate/index.html?id=2281025263805392133).
+More information about this process is also found here [TwinCAT 3 | Machine update at file level](https://infosys.beckhoff.com/content/1033/tc3_grundlagen/10696055051.html?id=2628406925900354307).
  
 
 # Summary of the code:
@@ -53,7 +53,7 @@ This sample is created by [Beckhoff Automation LLC](https://www.beckhoff.com/en-
 Should you have any questions regarding the provided sample code, please contact your local Beckhoff support team. Contact information can be found on the official Beckhoff website at https://www.beckhoff.com/en-us/support/.
 
 # Further Information
-[TwinCAT 3 | Machine update at file level](https://infosys.beckhoff.com/content/1033/machineupdate/index.html?id=2281025263805392133)
+[TwinCAT 3 | Machine update at file level](https://infosys.beckhoff.com/content/1033/tc3_grundlagen/10696055051.html?id=2628406925900354307)
 
 [TwinCAT 3 | Variant Management](https://infosys.beckhoff.com/content/1033/variant_management/index.html?id=640168702518993771)
 
@@ -64,5 +64,5 @@ Should you have any questions regarding the provided sample code, please contact
 
 The following components must be installed to run the sample code:
 
-- [TE1000 TwinCAT 3 Engineering](https://www.beckhoff.com/en-en/products/automation/twincat/te1xxx-twincat-3-engineering/te1000.html) version 3.1.4024.0 or higher
+- [TE1000 TwinCAT 3 Engineering](https://www.beckhoff.com/TE1000) version 3.1.4024.0 or higher
 - A copy of the PowerShell script and .bat from the scripts folder of this repo stored into C:\TwinCAT\3.1\Target\Resource.
